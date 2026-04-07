@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Buyer Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <div class="page-header">
+    <div class="page-title">
+      🏭 Buyer Dashboard
+      <small>Welcome back, {{ profile.company_name|default:user.username }}</small>
+    </div>
+    <a href="{% url 'product_list' %}" class="btn btn-primary">🔍 Browse Parts</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon cyan">📦</div>
+      <div><div class="stat-value">{{ total_products }}</div><div class="stat-label">Available Parts</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">🛒</div>
+      <div><div class="stat-value">{{ total_orders }}</div><div class="stat-label">My Total Orders</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">⏳</div>
+      <div><div class="stat-value">{{ pending_orders }}</div><div class="stat-label">Pending Orders</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div><div class="stat-value">{{ delivered_orders }}</div><div class="stat-label">Delivered Orders</div></div>
+    </div>
+  </div>
+
+  <!-- Order Track -->
+  <div class="card">
+    <div class="card-title">🛒 Recent Orders</div>
+    {% if recent_orders %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order #</th><th>Product</th><th>Supplier</th><th>Qty</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td><strong>#{{ order.id }}</strong></td>
+            <td><a href="{% url 'product_detail' order.product.id %}">{{ order.product.name }}</a></td>
+            <td>{{ order.product.supplier.profile.company_name|default:order.product.supplier.username }}</td>
+            <td>{{ order.quantity }}</td>
+            <td style="color:var(--success);font-weight:600;">₹{{ order.total_price }}</td>
+            <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+            <td>{{ order.placed_at|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:1rem;text-align:right;">
+      <a href="{% url 'buyer_orders' %}">View all my orders →</a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">🛒</div>
+      <p>You haven't placed any orders yet.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-primary mt-1">Browse Catalog</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

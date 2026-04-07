@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <div class="page-header">
+    <div class="page-title">
+      ⚙️ Admin Dashboard
+      <small>Platform overview and management</small>
+    </div>
+    <a href="/admin/" class="btn btn-outline">Django Admin Panel →</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">👥</div>
+      <div><div class="stat-value">{{ total_users }}</div><div class="stat-label">Total Users</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">🔧</div>
+      <div><div class="stat-value">{{ total_suppliers }}</div><div class="stat-label">Suppliers</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cyan">🏭</div>
+      <div><div class="stat-value">{{ total_buyers }}</div><div class="stat-label">Buyers</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">📦</div>
+      <div><div class="stat-value">{{ total_products }}</div><div class="stat-label">Products Listed</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">🛒</div>
+      <div><div class="stat-value">{{ total_orders }}</div><div class="stat-label">Total Orders</div></div>
+    </div>
+  </div>
+
+  <!-- Pending Supplier Approvals -->
+  {% if pending_suppliers %}
+  <div class="card">
+    <div class="card-title">⏳ Pending Supplier Approvals
+      <span class="nav-badge">{{ pending_suppliers|length }}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th><th>Company</th><th>Phone</th>
+            <th>Email</th><th>Registered</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in pending_suppliers %}
+          <tr>
+            <td><strong>{{ profile.user.username }}</strong></td>
+            <td>{{ profile.company_name|default:"—" }}</td>
+            <td>{{ profile.phone|default:"—" }}</td>
+            <td>{{ profile.user.email }}</td>
+            <td>{{ profile.created_at|date:"d M Y" }}</td>
+            <td>
+              <form method="post" action="{% url 'approve_supplier' profile.user.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-success btn-sm">✅ Approve</button>
+              </form>
+              <form method="post" action="{% url 'reject_supplier' profile.user.id %}" style="display:inline;margin-left:0.5rem;">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm">❌ Reject</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Recent Orders -->
+  <div class="card">
+    <div class="card-title">📋 Recent Orders</div>
+    {% if recent_orders %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.buyer.username }}</td>
+            <td>{{ order.product.name }}</td>
+            <td>{{ order.quantity }}</td>
+            <td style="color:var(--success);font-weight:600;">₹{{ order.total_price }}</td>
+            <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+            <td>{{ order.placed_at|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="icon">📭</div><p>No orders yet.</p></div>
+    {% endif %}
+  </div>
+
+  <!-- All Suppliers -->
+  <div class="card">
+    <div class="card-title">🔧 All Suppliers</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Username</th><th>Company</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for profile in all_suppliers %}
+          <tr>
+            <td>{{ profile.user.username }}</td>
+            <td>{{ profile.company_name|default:"—" }}</td>
+            <td>{{ profile.user.email }}</td>
+            <td>
+              <span class="badge {% if profile.is_approved %}badge-approved{% else %}badge-unapproved{% endif %}">
+                {% if profile.is_approved %}Approved{% else %}Pending{% endif %}
+              </span>
+            </td>
+            <td>
+              {% if profile.is_approved %}
+              <form method="post" action="{% url 'reject_supplier' profile.user.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm">Revoke</button>
+              </form>
+              {% else %}
+              <form method="post" action="{% url 'approve_supplier' profile.user.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-success btn-sm">Approve</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No suppliers registered.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

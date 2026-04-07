@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Browse Parts Catalog{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-header">
+    <div class="page-title">
+      🔍 Parts Catalog
+      <small>Search and discover industrial mechanical parts from registered manufacturers.</small>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <form method="get" class="search-bar">
+    <img src="https://img.icons8.com/ios-glyphs/24/94a3b8/search--v1.png" style="position:absolute;margin: 12px;opacity:0.6;"/>
+    <input type="text" name="q" value="{{ query }}" placeholder="Search parts by name, material, spec..." style="padding-left:40px;" />
+    <select name="category">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+        <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == selected_category %}selected{% endif %}>
+          {{ cat.name }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if query or selected_category %}
+      <a href="{% url 'product_list' %}" class="btn btn-outline" style="margin-left:auto;">Clear Filters</a>
+    {% endif %}
+  </form>
+
+  <!-- Product Grid -->
+  {% if products %}
+    <div class="product-grid">
+      {% for product in products %}
+        <a href="{% url 'product_detail' product.id %}" class="product-card" style="text-decoration:none;color:inherit;display:block;">
+          <div class="product-img">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy"/>
+            {% else %}
+              <div style="font-size:3rem;opacity:0.3;">🔩</div>
+            {% endif %}
+          </div>
+          <div class="product-info">
+            <div class="product-name" style="height:2.6rem;overflow:hidden;text-overflow:ellipsis;">{{ product.name }}</div>
+            <div class="product-supplier">🏢 {{ product.supplier.profile.company_name|default:product.supplier.username }}</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+              <div class="product-price">₹{{ product.price_per_unit }} <small>/unit</small></div>
+              {% if product.category %}
+                <div class="badge badge-pending">{{ product.category.name }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="icon">🔍</div>
+      <p>No products found matching your criteria.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

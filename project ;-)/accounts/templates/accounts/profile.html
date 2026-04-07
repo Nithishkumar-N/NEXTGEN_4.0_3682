@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-header">
+    <div class="page-title">
+      👤 My Profile
+      <small>Manage your account information</small>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;" class="profile-grid">
+
+    <!-- Left: User Summary -->
+    <div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:4rem;margin-bottom:1rem;">
+          {% if profile.is_supplier %}🔧{% else %}🏭{% endif %}
+        </div>
+        <h3 style="font-size:1.2rem;font-weight:700;">{{ user.get_full_name|default:user.username }}</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">{{ user.email }}</p>
+        <div style="margin-top:1rem;">
+          <span class="badge {% if profile.role == 'supplier' %}badge-accepted{% else %}badge-shipped{% endif %}">
+            {{ profile.role|capfirst }}
+          </span>
+          {% if profile.is_supplier %}
+            <span class="badge {% if profile.is_approved %}badge-approved{% else %}badge-unapproved{% endif %}" style="margin-left:0.5rem;">
+              {% if profile.is_approved %}Approved{% else %}Pending{% endif %}
+            </span>
+          {% endif %}
+        </div>
+        <hr class="divider"/>
+        <div style="text-align:left;">
+          <p style="font-size:0.85rem;color:var(--text-muted);">🏢 {{ profile.company_name|default:"—" }}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">📞 {{ profile.phone|default:"—" }}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">📍 {{ profile.address|default:"—" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Edit Form -->
+    <div class="card">
+      <div class="card-title">✏️ Edit Profile Information</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Company / Organisation</label>
+          <input type="text" name="company_name" class="form-control"
+                 value="{{ form.company_name.value|default:'' }}" placeholder="Your company name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" name="phone" class="form-control"
+                 value="{{ form.phone.value|default:'' }}" placeholder="+91 98765 43210"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea name="address" class="form-control" rows="3"
+                    placeholder="Full address...">{{ form.address.value|default:'' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline" style="margin-left:0.5rem;">Cancel</a>
+      </form>
+    </div>
+
+  </div>
+</div>
+<style>
+@media(max-width:768px){ .profile-grid{ grid-template-columns:1fr !important; } }
+</style>
+{% endblock %}

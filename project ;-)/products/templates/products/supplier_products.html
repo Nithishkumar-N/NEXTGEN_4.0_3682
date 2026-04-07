@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}My Products{% endblock %}
+
+{% block content %}
+<div class="main-content">
+  <div class="page-header">
+    <div class="page-title">
+      📦 My Product Inventory
+      <small>Manage your catalog of listed parts</small>
+    </div>
+    <a href="{% url 'product_add' %}" class="btn btn-primary">➕ Add New Product</a>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th><th>Name</th><th>Category</th>
+            <th>Stock</th><th>Price/Unit</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td style="width:60px;">
+              <div style="width:40px;height:40px;border-radius:6px;overflow:hidden;background:var(--surface2);display:flex;align-items:center;justify-content:center;">
+                {% if product.image %}
+                  <img src="{{ product.image.url }}" style="width:100%;height:100%;object-fit:cover;"/>
+                {% else %}
+                  <span style="font-size:1.2rem;opacity:0.5;">🔩</span>
+                {% endif %}
+              </div>
+            </td>
+            <td><strong>{{ product.name }}</strong></td>
+            <td>{{ product.category.name|default:"—" }}</td>
+            <td>
+              <span {% if product.stock_quantity < 50 %}style="color:var(--danger);font-weight:700;"{% endif %}>
+                {{ product.stock_quantity }}
+              </span>
+            </td>
+            <td>₹{{ product.price_per_unit }}</td>
+            <td>
+              {% if product.is_active %}
+                <span class="badge badge-approved">Active</span>
+              {% else %}
+                <span class="badge badge-unapproved">Hidden</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'product_edit' product.id %}" class="btn btn-outline btn-sm">📝 Edit</a>
+              <a href="{% url 'product_delete' product.id %}" class="btn btn-danger btn-sm" style="margin-left:5px;">🗑️</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="icon">📦</div>
+                <p>You haven't added any products yet.</p>
+                <a href="{% url 'product_add' %}" class="btn btn-primary mt-1">Add First Product</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

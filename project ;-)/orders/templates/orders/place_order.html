@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Place Order: {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:900px;">
+  <div style="margin-bottom:1.5rem;"><a href="{% url 'product_detail' product.id %}" class="btn btn-outline btn-sm">← Back to Product</a></div>
+
+  <div class="page-header">
+    <div class="page-title">🛍️ Place Order</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+
+    <!-- Left: Order Form -->
+    <div class="card">
+      <div class="card-title">Order Details</div>
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" id="qty-input" name="quantity" class="form-control"
+                 value="{{ product.minimum_order_qty }}"
+                 min="{{ product.minimum_order_qty }}" max="{{ product.stock_quantity }}" required/>
+          <small style="color:var(--text-muted);display:block;margin-top:0.25rem;">Min order: {{ product.minimum_order_qty }} | Max avail: {{ product.stock_quantity }}</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Delivery Address *</label>
+          <textarea name="delivery_address" class="form-control" rows="4" required placeholder="Full shipping address...">{{ user.profile.address|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Special Notes / Instructions</label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Please pack securely..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:1rem;">Confirm Order →</button>
+      </form>
+    </div>
+
+    <!-- Right: Summary -->
+    <div>
+      <div class="card" style="position:sticky;top:90px;">
+        <div class="card-title">Order Summary</div>
+
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;">
+          <div style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:var(--surface2);">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" style="width:100%;height:100%;object-fit:cover;"/>
+            {% else %}
+              <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.5rem;">🔩</div>
+            {% endif %}
+          </div>
+          <div>
+            <div style="font-weight:600;">{{ product.name }}</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);">From: {{ product.supplier.profile.company_name|default:product.supplier.username }}</div>
+          </div>
+        </div>
+
+        <hr class="divider" style="margin:1rem 0;"/>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+          <span style="color:var(--text-muted)">Price per unit</span>
+          <span id="price-per">₹{{ product.price_per_unit }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+          <span style="color:var(--text-muted)">Quantity</span>
+          <span id="summary-qty">{{ product.minimum_order_qty }}</span>
+        </div>
+
+        <hr class="divider" style="margin:1rem 0;"/>
+
+        <div style="display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;">
+          <span>Estimated Total</span>
+          <span style="color:var(--success)">₹<span id="total-price">0.00</span></span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Simple JS to update the estimated total live
+  const qtyInput = document.getElementById('qty-input');
+  const summaryQty = document.getElementById('summary-qty');
+  const totalPrice = document.getElementById('total-price');
+  const unitPrice = parseFloat("{{ product.price_per_unit }}");
+
+  function updateTotal() {
+    const qty = parseInt(qtyInput.value) || 0;
+    summaryQty.textContent = qty;
+    totalPrice.textContent = (qty * unitPrice).toFixed(2);
+  }
+
+  qtyInput.addEventListener('input', updateTotal);
+  updateTotal(); // initial calc
+</script>
+{% endblock %}

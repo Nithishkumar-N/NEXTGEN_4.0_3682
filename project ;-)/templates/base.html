@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}PartLink{% endblock %} — Industrial Parts Marketplace</title>
+  <meta name="description" content="PartLink connects small manufacturers with industries for small quantity part orders."/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+  {% block extra_css %}{% endblock %}
+  <script>
+    // Initialize theme to prevent flash
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  </script>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+{% if user.is_authenticated %}
+<nav class="navbar">
+  <a href="{% url 'dashboard' %}" class="navbar-brand">Part<span>Link</span></a>
+
+  <div class="nav-links">
+    <a href="{% url 'dashboard' %}">🏠 <span>Dashboard</span></a>
+    <a href="{% url 'product_list' %}">🔍 <span>Products</span></a>
+
+    {% if user.is_superuser or user.is_staff %}
+      <a href="{% url 'admin_dashboard' %}">⚙️ <span>Admin</span></a>
+
+    {% elif user.profile.is_supplier %}
+      <a href="{% url 'supplier_products' %}">📦 <span>My Products</span></a>
+      <a href="{% url 'supplier_orders' %}">📋 <span>Orders</span></a>
+
+    {% elif user.profile.is_buyer %}
+      <a href="{% url 'buyer_orders' %}">🛒 <span>My Orders</span></a>
+    {% endif %}
+
+    <a href="{% url 'profile' %}">👤 <span>{{ user.first_name|default:user.username }}</span></a>
+    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ── MESSAGES ── -->
+{% if messages %}
+<div style="padding: 1rem 2rem 0; max-width: 1280px; margin: 0 auto;">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── PAGE CONTENT ── -->
+{% block content %}{% endblock %}
+
+<!-- ── THEME TOGGLE ── -->
+<button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle Theme">
+  <span id="themeIcon">☀️</span>
+</button>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

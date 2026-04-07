@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:600px;text-align:center;margin-top:4rem;">
+  <div class="card" style="padding:3rem 2rem;">
+    <div style="font-size:4rem;margin-bottom:1rem;">⚠️</div>
+    <h2 style="margin-bottom:1rem;">Delete Product</h2>
+    <p style="color:var(--text-muted);font-size:1.1rem;margin-bottom:2rem;">
+      Are you sure you want to permanently delete <strong>"{{ product.name }}"</strong>? <br>
+      <small style="display:block;margin-top:0.5rem;color:var(--danger)">This action cannot be undone and will not affect past orders.</small>
+    </p>
+
+    <form method="post" style="display:flex;gap:1rem;justify-content:center;">
+      {% csrf_token %}
+      <a href="{% url 'supplier_products' %}" class="btn btn-outline btn-lg">Cancel</a>
+      <button type="submit" class="btn btn-danger btn-lg">🗑️ Yes, Delete Product</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Supplier Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <div class="page-header">
+    <div class="page-title">
+      🔧 Supplier Dashboard
+      <small>Welcome back, {{ profile.company_name|default:user.username }}</small>
+    </div>
+    <a href="{% url 'product_add' %}" class="btn btn-primary">➕ Add New Product</a>
+  </div>
+
+  {% if not profile.is_approved %}
+  <div class="pending-box">
+    <div class="icon">⌛</div>
+    <div>
+      <strong style="color:var(--warning);font-size:1.1rem;">Your account is pending admin approval.</strong>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.25rem;">
+        You can view this dashboard, but you won't be able to list products or receive orders until an admin approves your profile.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">📦</div>
+      <div><div class="stat-value">{{ active_products }}</div><div class="stat-label">Active Products</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">🛒</div>
+      <div><div class="stat-value">{{ total_orders }}</div><div class="stat-label">Total Orders</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">⏳</div>
+      <div><div class="stat-value">{{ pending_orders }}</div><div class="stat-label">Pending Orders</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;" class="supplier-grid">
+    <!-- Left: Incoming Orders -->
+    <div class="card">
+      <div class="card-title">🚨 Recent Orders</div>
+      {% if recent_orders %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td>#{{ order.id }}</td>
+              <td>{{ order.buyer.username }}</td>
+              <td>{{ order.product.name }}</td>
+              <td>{{ order.quantity }}</td>
+              <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:1rem;text-align:right;">
+        <a href="{% url 'supplier_orders' %}">View all orders →</a>
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="icon">📭</div><p>No new orders.</p></div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Low Stock Alert -->
+    <div class="card">
+      <div class="card-title" style="color:var(--warning);">⚠️ Low Stock Alerts</div>
+      {% if low_stock %}
+      <ul style="list-style:none;">
+        {% for product in low_stock %}
+        <li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>{{ product.name }}</strong><br>
+            <span style="font-size:0.8rem;color:var(--text-muted);">Stock: <strong style="color:var(--danger)">{{ product.stock_quantity }}</strong> left</span>
+          </div>
+          <a href="{% url 'product_edit' product.id %}" class="btn btn-outline btn-sm">Update</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div style="text-align:center;color:var(--text-muted);padding:1rem 0;">All products well stocked.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+<style>
+@media(max-width:900px){ .supplier-grid{ grid-template-columns:1fr !important; } }
+</style>
+{% endblock %}
