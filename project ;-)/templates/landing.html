@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to PartLink{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Landing Page Specific Styles ── */
+.hero {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: radial-gradient(circle at top right, var(--bg-hover), var(--bg));
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 150vw;
+  height: 150vw;
+  background: conic-gradient(from 180deg at 50% 50%, var(--accent) 0deg, transparent 60deg, transparent 360deg);
+  opacity: 0.05;
+  animation: spin 30s linear infinite;
+  z-index: 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.cta-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-large {
+  font-size: 1.1rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-large:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(26, 156, 216, 0.3);
+}
+
+.features {
+  padding: 5rem 2rem;
+  background: var(--card-bg);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: var(--bg);
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  border-color: var(--accent);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  background: var(--bg-hover);
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  border-radius: 20px;
+  color: var(--accent);
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.feature-card p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ── HERO SECTION ── -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Connect. Source. Manufacture.</h1>
+    <p>
+      PartLink is the premier marketplace bridging the gap between small-scale manufacturers and industrial buyers. 
+      Streamline your supply chain for low-quantity, high-quality industrial parts today.
+    </p>
+    <div class="cta-group">
+      <a href="{% url 'register' %}" class="btn btn-primary btn-large">
+        Get Started →
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-outline btn-large">
+        Login to Account
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES SECTION ── -->
+<section class="features">
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🏭</div>
+      <h3>For Suppliers</h3>
+      <p>Showcase your manufacturing capabilities. List your specialized parts, reach new buyers globally, and seamlessly manage your incoming orders from a unified dashboard.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛒</div>
+      <h3>For Buyers</h3>
+      <p>Discover rare or custom components for your project. Skip the hassle of bulk minimums and order exactly the small-quantity parts right when you need them.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Seamless Process</h3>
+      <p>From placing an order to tracking deliveries, our platform handles the status updates and notifications natively so you can focus on building and creating.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
