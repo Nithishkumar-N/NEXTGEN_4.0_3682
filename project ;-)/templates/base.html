@@ -9,16 +9,19 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
   {% block extra_css %}{% endblock %}
   <script>
-    // Initialize theme to prevent flash
+    // Initialize theme instantly to prevent flash
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
   </script>
 </head>
 <body>
 
+<!-- ── DYNAMIC PARTICLE BACKGROUND ── -->
+<canvas id="bg-canvas"></canvas>
+
 <!-- ── NAVBAR ── -->
 <nav class="navbar">
-  <a href="{% url 'dashboard' %}" class="navbar-brand">Part<span>Link</span></a>
+  <a href="/" class="navbar-brand">Part<span style="font-weight:300">Link</span></a>
 
   <div class="nav-links">
     {% if user.is_authenticated %}
@@ -40,14 +43,14 @@
       <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
     {% else %}
       <a href="{% url 'login' %}">🔑 <span>Login</span></a>
-      <a href="{% url 'register' %}" class="btn btn-primary" style="margin-left: 0.5rem; padding: 0.5rem 1rem;">Sign Up</a>
+      <a href="{% url 'register' %}" class="btn btn-primary btn-sm" style="margin-left:0.5rem;">Sign Up</a>
     {% endif %}
   </div>
 </nav>
 
-<!-- ── MESSAGES ── -->
+<!-- ── FLASH MESSAGES ── -->
 {% if messages %}
-<div style="padding: 1rem 2rem 0; max-width: 1280px; margin: 0 auto;">
+<div style="position:relative;z-index:2;padding:0.75rem 2.5rem 0;max-width:1360px;margin:0 auto;">
   {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">
       {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
