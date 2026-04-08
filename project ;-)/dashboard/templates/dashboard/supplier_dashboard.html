@@ -12,6 +12,22 @@
     <a href="{% url 'product_add' %}" class="btn btn-primary">➕ Add New Product</a>
   </div>
 
+  <!-- Notifications -->
+  {% if notifications %}
+  <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--accent);">
+    <div class="card-title" style="margin-bottom: 0.5rem;">🔔 Recent Notifications</div>
+    <ul style="list-style:none; padding:0; margin:0;">
+      {% for note in notifications %}
+      <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+        <strong style="display:block; margin-bottom: 0.25rem;">{{ note.subject }}</strong>
+        <p style="margin:0; font-size: 0.9rem; color: var(--text-muted); white-space: pre-wrap;">{{ note.message }}</p>
+        <small style="color: var(--text-muted); font-size: 0.75rem;">{{ note.created_at|timesince }} ago</small>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
   {% if not profile.is_approved %}
   <div class="pending-box">
     <div class="icon">⌛</div>

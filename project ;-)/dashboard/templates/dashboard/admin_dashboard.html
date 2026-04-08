@@ -1,18 +1,96 @@
 {% extends 'base.html' %}
 {% block title %}Admin Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ── Notification Modal ──────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  width: min(520px, 92vw);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  animation: fadeInScale .2s ease;
+}
+@keyframes fadeInScale {
+  from { opacity:0; transform:scale(.92); }
+  to   { opacity:1; transform:scale(1);  }
+}
+.modal-box h3 { margin: 0 0 1.2rem; font-size:1.15rem; color:var(--accent); }
+.modal-box label { display:block; margin-bottom:.35rem; font-size:.85rem; color:var(--text-muted); }
+.modal-box input[type=text],
+.modal-box textarea {
+  width: 100%; box-sizing: border-box;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: .6rem .85rem;
+  margin-bottom: 1rem;
+  font-size: .95rem;
+  resize: vertical;
+}
+.modal-box input[type=text]:focus,
+.modal-box textarea:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:.5rem; }
+/* ── Broadcast cards ─────────────────────────────────── */
+.broadcast-row { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.5rem; }
+@media(max-width:700px){ .broadcast-row{ grid-template-columns:1fr; } }
+.broadcast-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.4rem 1.6rem;
+}
+.broadcast-card h4 { margin:0 0 1rem; font-size:1rem; }
+.broadcast-card input[type=text],
+.broadcast-card textarea {
+  width:100%; box-sizing:border-box;
+  background:var(--bg); border:1px solid var(--border);
+  color:var(--text); border-radius:8px;
+  padding:.55rem .8rem; margin-bottom:.7rem;
+  font-size:.9rem; resize:vertical;
+}
+.broadcast-card input[type=text]:focus,
+.broadcast-card textarea:focus { outline:none; border-color:var(--accent); }
+/* ── inline notify btn ───────────────────────────────── */
+.btn-notify { background: linear-gradient(135deg,#1d6fa4,#1a9cd8); color:#fff; }
+.btn-notify:hover { opacity:.88; }
+/* ── order status select ─────────────────────────────── */
+.status-select {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: .3rem .5rem;
+  font-size:.82rem; cursor:pointer;
+}
+.status-select:focus { outline:none; border-color:var(--accent); }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="main-content">
 
+  <!-- ── Page Header ───────────────────────────────────────── -->
   <div class="page-header">
     <div class="page-title">
       ⚙️ Admin Dashboard
-      <small>Platform overview and management</small>
+      <small>Platform overview &amp; management</small>
     </div>
     <a href="/admin/" class="btn btn-outline">Django Admin Panel →</a>
   </div>
 
-  <!-- Stats -->
+  <!-- ── Stats ─────────────────────────────────────────────── -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon blue">👥</div>
@@ -36,7 +114,43 @@
     </div>
   </div>
 
-  <!-- Pending Supplier Approvals -->
+  <!-- ── Broadcast Notifications ───────────────────────────── -->
+  <div class="card">
+    <div class="card-title">📢 Broadcast Notifications
+      <small style="font-size:.8rem;font-weight:400;color:var(--text-muted);margin-left:.5rem;">Send a message to all suppliers or all buyers at once</small>
+    </div>
+    <div class="broadcast-row">
+
+      <!-- All Suppliers -->
+      <div class="broadcast-card">
+        <h4>📣 Notify All Approved Suppliers</h4>
+        <form method="post" action="{% url 'notify_all_suppliers' %}">
+          {% csrf_token %}
+          <label>Subject</label>
+          <input type="text" name="subject" placeholder="e.g. Platform update" maxlength="200">
+          <label>Message</label>
+          <textarea name="message" rows="4" placeholder="Type your message here…" required></textarea>
+          <button type="submit" class="btn btn-success" style="width:100%;">📧 Send to All Suppliers</button>
+        </form>
+      </div>
+
+      <!-- All Buyers -->
+      <div class="broadcast-card">
+        <h4>📣 Notify All Buyers</h4>
+        <form method="post" action="{% url 'notify_all_buyers' %}">
+          {% csrf_token %}
+          <label>Subject</label>
+          <input type="text" name="subject" placeholder="e.g. New products available" maxlength="200">
+          <label>Message</label>
+          <textarea name="message" rows="4" placeholder="Type your message here…" required></textarea>
+          <button type="submit" class="btn btn-primary" style="width:100%;">📧 Send to All Buyers</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Pending Supplier Approvals ────────────────────────── -->
   {% if pending_suppliers %}
   <div class="card">
     <div class="card-title">⏳ Pending Supplier Approvals
@@ -58,12 +172,12 @@
             <td>{{ profile.phone|default:"—" }}</td>
             <td>{{ profile.user.email }}</td>
             <td>{{ profile.created_at|date:"d M Y" }}</td>
-            <td>
+            <td style="white-space:nowrap;">
               <form method="post" action="{% url 'approve_supplier' profile.user.id %}" style="display:inline;">
                 {% csrf_token %}
                 <button class="btn btn-success btn-sm">✅ Approve</button>
               </form>
-              <form method="post" action="{% url 'reject_supplier' profile.user.id %}" style="display:inline;margin-left:0.5rem;">
+              <form method="post" action="{% url 'reject_supplier' profile.user.id %}" style="display:inline;margin-left:.4rem;">
                 {% csrf_token %}
                 <button class="btn btn-danger btn-sm">❌ Reject</button>
               </form>
@@ -76,47 +190,23 @@
   </div>
   {% endif %}
 
-  <!-- Recent Orders -->
-  <div class="card">
-    <div class="card-title">📋 Recent Orders</div>
-    {% if recent_orders %}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>#</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Total</th><th>Status</th><th>Date</th></tr>
-        </thead>
-        <tbody>
-          {% for order in recent_orders %}
-          <tr>
-            <td>#{{ order.id }}</td>
-            <td>{{ order.buyer.username }}</td>
-            <td>{{ order.product.name }}</td>
-            <td>{{ order.quantity }}</td>
-            <td style="color:var(--success);font-weight:600;">₹{{ order.total_price }}</td>
-            <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
-            <td>{{ order.placed_at|date:"d M Y" }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="empty-state"><div class="icon">📭</div><p>No orders yet.</p></div>
-    {% endif %}
-  </div>
-
-  <!-- All Suppliers -->
+  <!-- ── All Suppliers ──────────────────────────────────────── -->
   <div class="card">
     <div class="card-title">🔧 All Suppliers</div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Username</th><th>Company</th><th>Email</th><th>Status</th><th>Action</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Username</th><th>Company</th><th>Email</th>
+            <th>Status</th><th>Approval</th><th>Notify</th>
+          </tr>
+        </thead>
         <tbody>
           {% for profile in all_suppliers %}
           <tr>
             <td>{{ profile.user.username }}</td>
             <td>{{ profile.company_name|default:"—" }}</td>
-            <td>{{ profile.user.email }}</td>
+            <td>{{ profile.user.email|default:"—" }}</td>
             <td>
               <span class="badge {% if profile.is_approved %}badge-approved{% else %}badge-unapproved{% endif %}">
                 {% if profile.is_approved %}Approved{% else %}Pending{% endif %}
@@ -135,14 +225,138 @@
               </form>
               {% endif %}
             </td>
+            <td>
+              <button class="btn btn-notify btn-sm"
+                      onclick="openNotifyModal('supplier','{{ profile.user.id }}','{{ profile.user.username }}')">
+                📧 Notify
+              </button>
+            </td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No suppliers registered.</td></tr>
+          <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No suppliers registered.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
 
+  <!-- ── All Buyers ─────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">🏭 All Buyers</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Username</th><th>Company</th><th>Email</th><th>Phone</th><th>Joined</th><th>Notify</th></tr>
+        </thead>
+        <tbody>
+          {% for profile in all_buyers %}
+          <tr>
+            <td>{{ profile.user.username }}</td>
+            <td>{{ profile.company_name|default:"—" }}</td>
+            <td>{{ profile.user.email|default:"—" }}</td>
+            <td>{{ profile.phone|default:"—" }}</td>
+            <td>{{ profile.created_at|date:"d M Y" }}</td>
+            <td>
+              <button class="btn btn-notify btn-sm"
+                      onclick="openNotifyModal('buyer','{{ profile.user.id }}','{{ profile.user.username }}')">
+                📧 Notify
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No buyers registered.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Recent Orders with Status Management ───────────────── -->
+  <div class="card">
+    <div class="card-title">📋 Recent Orders
+      <small style="font-size:.8rem;font-weight:400;color:var(--text-muted);margin-left:.5rem;">Change status below — buyer &amp; supplier will be notified by email</small>
+    </div>
+    {% if recent_orders %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.buyer.username }}</td>
+            <td>{{ order.product.name }}</td>
+            <td>{{ order.quantity }}</td>
+            <td style="color:var(--success);font-weight:600;">₹{{ order.total_price }}</td>
+            <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+            <td>{{ order.placed_at|date:"d M Y" }}</td>
+            <td>
+              <form method="post" action="{% url 'update_order_status' order.id %}" style="display:flex;gap:.4rem;align-items:center;">
+                {% csrf_token %}
+                <select name="status" class="status-select">
+                  {% for val, label in order_statuses %}
+                  <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Set</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="icon">📭</div><p>No orders yet.</p></div>
+    {% endif %}
+  </div>
+
+</div><!-- /main-content -->
+
+<!-- ── Notify Modal ───────────────────────────────────────────── -->
+<div class="modal-overlay" id="notifyModal">
+  <div class="modal-box">
+    <h3 id="modalTitle">📧 Send Notification</h3>
+    <form method="post" id="notifyForm">
+      {% csrf_token %}
+      <label>Subject</label>
+      <input type="text" name="subject" id="modalSubject" placeholder="e.g. Important platform update" maxlength="200">
+      <label>Message <span style="color:var(--danger)">*</span></label>
+      <textarea name="message" id="modalMessage" rows="5"
+                placeholder="Write your message…" required></textarea>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeNotifyModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">📧 Send Notification</button>
+      </div>
+    </form>
+  </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openNotifyModal(role, userId, username) {
+  document.getElementById('modalTitle').textContent =
+    '📧 Notify ' + (role === 'supplier' ? 'Supplier' : 'Buyer') + ': ' + username;
+  document.getElementById('notifyForm').action =
+    '/dashboard/notify/' + role + '/' + userId + '/';
+  document.getElementById('modalSubject').value = '';
+  document.getElementById('modalMessage').value = '';
+  document.getElementById('notifyModal').classList.add('open');
+}
+function closeNotifyModal() {
+  document.getElementById('notifyModal').classList.remove('open');
+}
+// Close on overlay click
+document.getElementById('notifyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeNotifyModal();
+});
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeNotifyModal();
+});
+</script>
 {% endblock %}

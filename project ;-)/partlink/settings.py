@@ -89,14 +89,18 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_URL = '/accounts/login/'
 
-# Email Configuration
-# Using real email backend (SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+# ── Email Configuration ──────────────────────────────────────────
+# Console backend: emails are printed to the terminal (no SMTP needed)
+# Great for development & demos — switch to SMTP for production.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'admin@partlink.local'
 
-# ACTION REQUIRED: Replace these with your actual Gmail and App Password
-EMAIL_HOST_USER = 'YOUR_EMAIL@gmail.com'
-EMAIL_HOST_PASSWORD = 'YOUR_APP_PASSWORD'  
-DEFAULT_FROM_EMAIL = 'YOUR_EMAIL@gmail.com'
+# ── To enable real Gmail delivery, comment the two lines above and
+# ── uncomment + fill in the block below:
+# EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST       = 'smtp.gmail.com'
+# EMAIL_PORT       = 587
+# EMAIL_USE_TLS    = True
+# EMAIL_HOST_USER  = 'YOUR_EMAIL@gmail.com'
+# EMAIL_HOST_PASSWORD = 'YOUR_GMAIL_APP_PASSWORD'
+# DEFAULT_FROM_EMAIL  = 'YOUR_EMAIL@gmail.com'
